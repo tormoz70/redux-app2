@@ -1,8 +1,9 @@
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
-import { AppState, CounterId, DecrimentAction, IncrimentAction, store } from './store'
+import { AppState, CounterId, DecrimentAction, IncrimentAction, store, useAppDispatch, useAppSelector } from './store'
 import { useEffect, useReducer, useRef } from 'react'
+import { useDispatch } from 'react-redux'
 
 function App() {
 
@@ -35,32 +36,18 @@ function App() {
 const selectCounter = (state: AppState, counterId: CounterId) => state.counters[counterId]
 
 export function Counter({counterId}: { counterId: CounterId }) {
-  const [, forceUpdate] = useReducer((x) => x + 1, 0)
-  console.log("render counter: ", counterId)
+  const dispatch = useAppDispatch();
+  const counterState = useAppSelector((state) => selectCounter(state, counterId));
 
-  const lastStateRef = useRef<ReturnType<typeof selectCounter>>(undefined)
-
-  useEffect(() => {
-    const unsubsribe = store.subscribe(() => {
-      const currentState = selectCounter(store.getState(), counterId)
-      const lastState = lastStateRef.current
-      if(currentState !== lastState){
-        forceUpdate()
-      }
-      lastStateRef.current = currentState
-    })
-    return unsubsribe
-  })
-
-  const counterState = selectCounter(store.getState(), counterId)
+  console.log("render counter: ", counterId);
 
   return (
     <>   
         <div>counter({ counterId }): {counterState?.counter}</div>
-        <button onClick={() => store.dispatch({ type: "incriment", payload: { counterId } } satisfies IncrimentAction)}>
+        <button onClick={() => dispatch({ type: "incriment", payload: { counterId } } satisfies IncrimentAction)}>
           incriment
         </button>
-        <button onClick={() => store.dispatch({ type: "decriment", payload: { counterId } } satisfies DecrimentAction)}>
+        <button onClick={() => dispatch({ type: "decriment", payload: { counterId } } satisfies DecrimentAction)}>
           decriment
         </button>
 
